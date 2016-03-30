@@ -6,6 +6,8 @@
 #include "PrintallStatement.h"
 #include "AddStatement.h"
 #include "SubStatement.h"
+#include "MultStatement.h"
+#include "DivStatement.h"
 #include "EndStatement.h"
 #include <vector>
 #include <string>
@@ -111,6 +113,23 @@ Statement * parseLine(string line)
 			statement = new SubStatement(var, val);
 		else
 			statement = new SubStatement(var, var_rhs);
+	}
+
+
+	if (type == "MULT") {
+		parseMathOperation(ss, var, val, var_rhs, isRhsDigit);
+		if (isRhsDigit)
+			statement = new MultStatement(var, val);
+		else
+			statement = new MultStatement(var, var_rhs);
+	}
+
+	if (type == "DIV") {
+		parseMathOperation(ss, var, val, var_rhs, isRhsDigit);
+		if (isRhsDigit)
+			statement = new DivStatement(var, val);
+		else
+			statement = new DivStatement(var, var_rhs);
 	}
 
 	if (type == "END" || type[0] == '.') {
