@@ -9,6 +9,6 @@ void GosubStatement::execute(ProgramState* state, std::ostream& outf) {
 		return; 
 	}
 
-	state->pushLine(state->getLine());
+	state->pushLine(state->getLine() + 1); // the next line to be executed
 	state->setLine(m_gotoLine);
 }

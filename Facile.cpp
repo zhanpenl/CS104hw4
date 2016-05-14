@@ -185,7 +185,7 @@ Statement * parseLine(string line)
 		statement = new GosubStatement(gotoLine);
 	}
 
-	if (type == "return") {
+	if (type == "RETURN") {
 		statement = new ReturnStatement();
 	}
 
@@ -216,7 +216,7 @@ void interpretProgram(istream& inf, ostream& outf)
 
 	while (state->getLine() > 0 && state->getLine() <= state->getNumLines()) {
 		program[state->getLine()]->execute(state, outf);
-		// cout << "After execution, Line number: " << state->getLine() << endl;
+		cout << "After execution, Line number: " << state->getLine() << endl;
 	}
 
 	for (uint i = 0; i < program.size(); i++) {
