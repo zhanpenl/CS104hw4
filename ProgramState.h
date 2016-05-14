@@ -40,19 +40,20 @@ public:
 	int getLine();
 	void setLine(int line);
 
-	bool containsVariable(std::string variableName);
+	bool containsVariable(std::string);
 	int getValue(std::string);
 	void setValue(std::string, int);
 
-	void printAll(std::ostream &outf);
+	void printAll(std::ostream& outf);
+
+	void pushLine(int);
+	int popLine();
 
 private:
 	int m_numLines;
 	int m_currentLine;
 	std::map<std::string, int> * varMap;
+	StackInt * programStack;
 };
 
 #endif
-
-
-

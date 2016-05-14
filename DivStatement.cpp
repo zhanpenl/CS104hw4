@@ -24,7 +24,7 @@ void DivStatement::execute(ProgramState * state, std::ostream &outf) {
 		// which is not a desired behavior
 		if (state->containsVariable(m_variableNameRHS)){
 			if (state->getValue(m_variableNameRHS) == 0) {
-			outf << "Divide by zero exception" << std::endl;
+			outf << "Divide by zero exception\n"; // 
 			state->setLine(-1);
 			return;
 			}

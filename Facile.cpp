@@ -8,13 +8,20 @@
 #include "SubStatement.h"
 #include "MultStatement.h"
 #include "DivStatement.h"
+#include "GotoStatement.h"
+#include "IfStatement.h"
+#include "GosubStatement.h"
+#include "ReturnStatement.h"
 #include "EndStatement.h"
 #include <vector>
 #include <string>
 #include <sstream> 
 #include <fstream>
 #include <cstdlib>
+
 #include <iostream> // added 
+#include <cstring>
+#include <cerrno>
 
 
 using namespace std;
@@ -37,25 +44,49 @@ void parseMathOperation(stringstream &ss, string &var,
 	int &val, string &var_rhs, bool &isRhsDigit);
 
 
-int main()
+int main(int argc, const char *argv[])
 {
-        cout << "Enter Facile program file name: ";
-        string filename;
-        getline(cin, filename);
-        ifstream infile(filename.c_str());
-        if (!infile)
-        {
-                cout << "Cannot open " << filename << "!" << endl;
-                return 1;
-        }
-        interpretProgram(infile, cout);
+    // cout << "Enter Facile program file name: ";
+    // string filename;
+    // getline(cin, filename);
+    // ifstream infile(filename.c_str());
+    // if (!infile)
+    // {
+    //         cout << "Cannot open " << filename << "!" << endl;
+    //         return 1;
+    // }
+    // interpretProgram(infile, cout);
+    if(argc < 3)
+    {
+        std::cerr << "Program usage: ./Facile inputFile outputFile" << std::endl;
+        return 1;
+    }
+
+    std::ifstream inFile(argv[1]);
+    std::ofstream outFile(argv[2]);
+    if (!inFile)
+    {
+        std::cerr << "Could not open file " << argv[1] << std::endl;
+        return 1;
+    }
+    if(!outFile)
+    {
+        std::cerr << "Could not open file " << argv[2] << std::endl;
+        return 1;
+    }
+
+    interpretProgram(inFile, outFile);
+    inFile.close();
+    outFile.close();
+
+    return 0;
 }
 
 
 
 void parseProgram(istream &inf, vector<Statement *> & program)
 {
-	program.push_back(NULL);
+	program.push_back(NULL); // 0th line, null statement
 	
 	string line;
 	while( ! inf.eof() )
@@ -73,7 +104,7 @@ Statement * parseLine(string line)
 	string type;
 	string var;
 	string var_rhs;
-	int val;
+	int val, gotoLine;
 	bool isRhsDigit;
 
 	ss << line;
@@ -132,11 +163,43 @@ Statement * parseLine(string line)
 			statement = new DivStatement(var, var_rhs);
 	}
 
+	if (type == "GOTO") {
+		ss >> gotoLine;
+		// cout << "Parse GOTO: gotoLine = " << gotoLine << endl;
+		statement = new GotoStatement(gotoLine);
+	}
+
+	if (type == "IF") {
+		string oprSymbol, then;
+		ss >> var;
+		ss >> oprSymbol;
+		ss >> val;
+		ss >> then;	// don't check the string "THEN"
+		ss >> gotoLine;
+
+		statement = new IfStatement(var, oprSymbol, val, gotoLine);
+	}
+
+	if (type == "GOSUB") {
+		ss >> gotoLine;
+		statement = new GosubStatement(gotoLine);
+	}
+
+	if (type == "return") {
+		statement = new ReturnStatement();
+	}
+
+
 	if (type == "END" || type[0] == '.') {
 		statement = new EndStatement();
 	}
 
-		
+	// static int count = 1;
+	// cout << count << ": " << type << endl;
+	// count++;
+
+	// if none of the above if statement is entered, null statement would return
+	// causing seg-fault when deleting
 	return statement;
 }
 
@@ -147,16 +210,17 @@ void interpretProgram(istream& inf, ostream& outf)
 	parseProgram( inf, program );
 
 	// Continuing part
-	ProgramState * state = new ProgramState(program.size() - 1);
+	ProgramState * state = new ProgramState(program.size() - 1); // there is a null statement at head
 
 	cout << "Lines of program: " << state->getNumLines() << endl << endl;
 
 	while (state->getLine() > 0 && state->getLine() <= state->getNumLines()) {
 		program[state->getLine()]->execute(state, outf);
-		//cout << "After execution, Line number: " << state->getLine() << endl;
+		// cout << "After execution, Line number: " << state->getLine() << endl;
 	}
 
-	for (uint i = 1; i < program.size(); i++) {
+	for (uint i = 0; i < program.size(); i++) {
+		// cout << "the " << i << "th time:" << endl;
 		delete program[i];
 	}
 	delete state;

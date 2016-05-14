@@ -5,11 +5,13 @@ using namespace std;
 ProgramState::ProgramState(int numLines) {
 	m_numLines = numLines;
 	m_currentLine = 1;
-	varMap = new map<string, int>; // why :: ? name "map" overlapped
+	varMap = new map<string, int>;
+	programStack = new StackInt;
 }
 
 ProgramState::~ProgramState() {
 	delete varMap;
+	delete programStack;
 }
 
 int ProgramState::getNumLines() {
@@ -47,4 +49,18 @@ void ProgramState::printAll(std::ostream &outf) {
 	{
 		outf << it->first << " " << it->second << std::endl;
 	}
+}
+
+void ProgramState::pushLine(int line) {
+	programStack->push(line);
+}
+
+int ProgramState::popLine() {
+	if ( programStack->empty() ) {
+		return -1;
+	}
+
+	int temp = programStack->top();
+	programStack->pop();
+	return temp;
 }
